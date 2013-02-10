@@ -41,3 +41,27 @@ void output(){
 
 
 change 001
+
+char * read (char *filen,char*key,struct list * head){
+    char *my_string;
+    char *filecontent=malloc(100);
+    FILE *fp;
+    if ((fp = fopen(filen, "r")) == NULL) {
+        printf(" can't open:%s.\n", filen);
+        return 1;
+    }
+    else {
+        struct list * temp=malloc(sizeof( struct list));;
+        
+        int bi=0;
+        char *a; char *s;char *b;
+        int loop=0;
+        char *out=malloc(10000);
+        struct nodeE * nod; struct nodeE * nodtemp;
+        while (fgets(filecontent, 1000, fp)!= NULL)
+        {
+            TokenizerT *tk;
+            tk= TKCreate(filecontent);
+            a=TKGetNextToken(tk);
+            
+            if(strcmp(a,"<list>")==0){
