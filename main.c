@@ -41,9 +41,13 @@ void output(){
 
 
 change 001
+<<<<<<< HEAD
 
 change 002
 
+=======
+////change  3
+>>>>>>> upstream/master
 char * read (char *filen,char*key,struct list * head){
     char *my_string;
     char *filecontent=malloc(100);
