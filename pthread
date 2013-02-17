@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+ #include <stdlib.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/mman.h>
+#include <sys/stat.h>        /* For mode constants */
+#include <fcntl.h>
+#include <string.h>
+#include <semaphore.h>
+
+volatile int cnt=0;
+pthread_mutex_t m1;
+sem_t s ;
+void *thread(int q){
+  int i, niters=10000;
+	for(i=0;i<niters;i++){
+	//	pthread_mutex_lock (&m1);
+		sem_wait(s);
+
+		cnt++;
+	sem_post(s);
+
+	//	pthread_mutex_unlock (&m1);
+
+	}
+	return NULL;
+}
+int main(){
+	   pthread_mutex_init(&m1, NULL);
+
+	   sem_init(s, 0, 1);
+
+	int niters;
+	pthread_t tid1,tid2;
+	niters=10000;
+
+	pthread_create(&tid1,NULL, thread, &niters);
+	pthread_create(&tid2,NULL, thread, &niters);
+	pthread_join(tid1, NULL);
+
+
+	if(cnt!=(2*niters)){
+		printf("wrong");
+
+	}else{
+		printf("yes");
+
+	}
+	printf("k= %d\n",cnt);
+
+}
