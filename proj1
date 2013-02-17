@@ -1,0 +1,327 @@
+/*
+ * mm.c
+ *
+ *  Created on: Feb 10, 2013
+ *      Author: chensiyuan2010
+ */
+
+
+/*
+ * mm.c
+ *
+ *  Created on: Feb 10, 2013
+ *      Author: chensiyuan2010
+ */
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+ #include <stdlib.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/mman.h>
+#include <sys/stat.h>        /* For mode constants */
+#include <fcntl.h>
+#include <string.h>
+#include <semaphore.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+ #include <stdlib.h>
+#include <pthread.h>
+
+pthread_mutex_t mutex;
+pthread_mutex_t m1;
+pthread_mutex_t m2;
+sem_t sem1 ;
+sem_t sem2 ;
+
+sem_t sem3 ;
+
+int v=4;
+int matrix[5][5][5] ;
+struct Qnode *queue;
+
+struct thread_data{
+   int data_k;
+   int data_i;
+};
+
+struct order{
+  int *row;
+	int ki[];
+};
+
+struct Qnode{
+	struct order * data;
+	struct Qnode * next;
+
+};
+struct Qnode * cQnode(){
+	struct Qnode *head=malloc(sizeof(	struct Qnode ));
+	head->next=malloc(sizeof(	struct Qnode ));
+	return head;
+}
+
+
+struct Qnode * createQueue()
+{
+	struct Qnode *head;
+        return head;
+}
+struct order * Dequeue(struct Qnode *Q)
+{
+	 // printf(" open:%d.\n", &Q);
+
+	struct order * out=malloc(sizeof(struct order));
+        /* If Queue size is zero then it is empty. So we cannot pop */
+        if(Q->data==NULL)
+        {
+                printf("Queue is Empty\n");
+                return NULL;
+        }
+        /* Removing an element is equivalent to incrementing index of front by one */
+        else
+        {
+        	out=Q->data;
+        		*Q=*Q->next;   ///////important   not Q=Q->next;
+      	//  printf(" in open:%s.\n", Q->data->Category);
+		 // printf(" fun:%d.\n", &Q);
+
+        	return out;
+        }
+
+}
+
+struct Qnode *Enqueue(struct Qnode *Q, struct order *element)
+{
+        /* If the Queue is full, we cannot push an element into it as there is no space for it.*/
+	struct Qnode *tail=cQnode();
+	struct Qnode *p=cQnode();
+
+	p=Q;
+	//tell the malloc and pointer.
+//if(strcmp(Q->data,"")==0){
+	//Q->data=element;}
+	if(Q->data==NULL){
+		//Q->data=malloc(sizeof(struct order));
+		Q->next=malloc(sizeof(struct Qnode));
+		Q->data=element;}
+else{
+	for(;;p=p->next){
+		if(p->next->data==NULL){
+	tail->data=element;
+
+	p->next=tail;
+
+        return Q;
+		  }
+		}
+	}
+}
+
+
+
+
+void output(int k){
+	int i,j;
+
+	for(i=1; i<v+1;i++){
+			for(j=1;j<v+1;j++){
+				printf("%d",matrix[k][i][j]);
+			}
+			printf("\n");
+		}
+}
+
+
+
+
+
+char * readf (char *filen){
+    char *my_string;
+    char *line=malloc(100);
+    FILE *fp;
+    if ((fp = fopen(filen, "r")) == NULL) {
+        printf(" can't open:%s.\n", filen);
+        return 1;
+    }
+    else {
+
+
+        while (fgets(line, 5, fp)!= NULL)
+        {
+
+        	int i;
+        			int j;
+        			sscanf(line, "%d %d", &i, &j);
+        			//printf("valid: %s\n",line);
+        			printf("%d %d\n",i, j);
+        	matrix[0][i][j]=1;
+        }
+
+    }
+
+    }
+
+
+
+void *worker(void *threadarg){
+	  printf("The ID of this thread is: %u\n", (unsigned int)pthread_self());
+
+	int v=4;
+	int rc;
+	struct thread_data *my_data;//copy the passing value;
+	my_data = (struct thread_data *) threadarg;
+
+	int j,i,k;
+
+	//i=my_data->data_i;
+	//k=my_data->data_k;
+	//pthread_mutex_lock (&m2);
+	while(queue->data!=NULL){
+		struct order *out=malloc(sizeof(struct order));
+		out=Dequeue(queue);
+		k=out->ki[0];
+		i=out->ki[1];
+		for(j=1; j<v+1;j++){
+					matrix[k][i][j]=matrix[k-1][i][j]||(matrix[k-1][i][k]&&matrix[k-1][k][j]);
+
+
+				}
+		//printf("eee\n");
+
+	}
+	// pthread_mutex_unlock (&m2);
+
+}
+
+void Fworker(void *threadarg){
+	  printf("The ID of this thread is: %u\n", (unsigned int)pthread_self());
+
+	int v=4;
+	int rc;
+	struct thread_data *my_data;//copy the passing value;
+	my_data = (struct thread_data *) threadarg;
+
+	int j,i,k;
+
+	//i=my_data->data_i;
+	//k=my_data->data_k;
+	while(queue->data!=NULL){
+		struct order *out=malloc(sizeof(struct order));
+		out=Dequeue(queue);
+		k=out->ki[0];
+		i=out->ki[1];
+		for(j=1; j<v+1;j++){
+					matrix[k][i][j]=matrix[k-1][i][j]||(matrix[k-1][i][k]&&matrix[k-1][k][j]);
+				}
+
+	}
+	output(k);
+}
+//t
+void outputRow(int a[]){
+	int j;
+	for(j=1;j<v+1;j++){
+					printf("%d",a[j]);
+				}
+	printf("\n");
+}
+
+int main(){
+	queue=malloc(sizeof(struct Qnode));
+	   pthread_mutex_init(&m1, NULL);
+	   pthread_mutex_init(&mutex, NULL);
+	   pthread_mutex_init(&m2, NULL);
+	   sem_init(sem1, 0, 1);
+	   sem_init(sem2, 0, 1);
+
+	int v=4;
+	//queue->next=malloc(sizeof(struct order));
+	pthread_t threads[v];
+
+// read the input file//the edge.
+	int i,k;int rc;
+	void *status;
+	readf("output.txt");
+	int t;
+	/*for(t=0; t<v; t++){
+		rc = pthread_create(&threads[t],NULL, worker, (void *)i);
+		printf("rc %d",rc);
+				 if (rc){
+				          printf("ERROR; return code from pthread_create() is %d\n", rc);
+				      //    exit(-1);
+				       }
+
+	}*/
+	rc = pthread_create(&threads[1],NULL, worker, (void *)i);
+//	pthread_mutex_lock (&mutex);
+
+	 pthread_mutex_lock (&m1);
+	//sem_wait(sem1);
+
+	for(k=1; k<v+1;k++){
+
+		//  pthread_mutex_lock (&mutex);
+
+		for(i=1;i<v+1;i++){
+
+
+
+			struct order *a=malloc(sizeof(int)*4);
+			a->row=matrix[k][i];
+			a->ki[0]=k;
+			a->ki[1]=i;
+			Enqueue(queue,a);
+			//printf("aaa %d\n",i);
+		//	outputRow(matrix[k][i]);
+			//printf("sss\n");
+			//outputRow(queue->data->row);
+
+		//	printf("ddd\n");
+
+
+
+		}
+		/*for(t=0; t<v; t++) {
+	      rc = pthread_join(threads[t], &status);
+	      if (rc) {
+	         printf("ERROR; return code from pthread_join()   is %d\n", rc);
+	         exit(-1);
+	         }
+	      printf("Main: completed join with thread %ld having a status of %ld\n",t,(long)status);
+	      }*/
+		// rc = pthread_join(threads[1], &status);
+
+		//   pthread_mutex_unlock (&mutex);
+
+		//output(k);
+		//printf("\n");
+		//printf("ddd\n");
+	//	outputRow(queue->next->data->row);
+				//	outputRow(queue->next->next->data->row);
+					//Dequeue(queue);
+				//	outputRow(matrix[1][3]);
+				//	 rc = pthread_join(threads[0], &status);
+				//	 Fworker((void *)i);
+		printf("k= %d\n",k);
+
+					output(k-1);
+	}
+	sem_post(sem1);
+
+	pthread_mutex_unlock (&m1);
+	 rc = pthread_join(threads[1], &status);
+//	 pthread_mutex_unlock (&mutex);
+		//sem_post(sem1);
+
+	printf("ttt\n");
+	output(4);
+	return 1;
+
+}
+
+
